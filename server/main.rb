@@ -37,17 +37,17 @@ class Board
     return_data = { }
 
     player = @players[id]
-    puts @players
+    puts data
     x = player.x
     y = player.y
     if (dist(x, y, new_x, new_y) > 5)
       player.facing = new_facing
-      return_data["player"] = player.to_json
+      return_data["player"] = player.to_hash
     else
       player.x      = new_x
       player.y      = new_y
       player.facing = new_facing
-      return_data["player"] = player.to_json
+      return_data["player"] = player.to_hash
     end
 
     return_data["food"] = food_json
@@ -57,15 +57,15 @@ class Board
   end
 
   def food_json
-    return @food.to_a.to_json
+    return @food.to_a
   end
 
   def players_json(id)
     return_arr = []
     @players.each do |player_id, player|
-      return_arr.push player if (id != player_id)
+      return_arr.push player.to_hash if (id != player_id)
     end
-    return_arr.to_json
+    return_arr
   end
 
   def update
@@ -108,10 +108,10 @@ class Player
     true
   end
 
-  def to_json(arg = nil)
+  def to_hash
     {"x" => @x,
      "y" => @y,
-     "facing" => @facing}.to_json
+     "facing" => @facing}
   end
 
 end

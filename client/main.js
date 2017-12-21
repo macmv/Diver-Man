@@ -2,23 +2,29 @@
 var ctx;
 var board;
 var playerId;
+var mouseX = 0;
+var mouseY = 0;
 
 class Board {
   constructor(data) {
-    this.players = [];
-    console.log(data);
+    this.other_players = [];
     this.player = new Player(data);
     this.food = [];
   }
 
   render() {
     for (var i = 0; i < this.food.length; i++) {
-      this.players[i].render();
+      this.food[i].render();
     }
-    for (var i = 0; i < this.players.length; i++) {
-      this.players[i].render();
+    for (i = 0; i < this.other_players.length; i++) {
+      this.other_players[i].render();
     }
     this.player.render();
+  }
+
+  update() {
+    this.player.update();
+    this.sendUpdate();
   }
 
   genUpdateData() { // return hash for server
@@ -26,7 +32,17 @@ class Board {
   }
 
   handleUpdate(data) {
-    console.log(data);
+    data = JSON.parse(data);
+    this.food = [];
+    console.log
+    for(var f in data.food) {
+      this.food.push(new Food(data.food[f]));
+    }
+    this.other_players = [];
+    for(var i in data.other_players) {
+      this.other_players.push(new OtherPlayer(data.other_players[i]));
+    }
+    console.log(this.other_players);
   }
 
   sendUpdate() {
@@ -42,10 +58,10 @@ class Board {
 }
 
 class Food {
-  constructor(x, y, type) {
-    this.x = x;
-    this.y = y;
-    this.type = type;
+  constructor(data) {
+    this.x = data.x;
+    this.y = data.y;
+    this.type = data.type;
   }
 
   render() {
@@ -57,7 +73,7 @@ class Food {
 class Player {
   constructor (data) {
     this.id = data["id"];
-    this.x = data["x"];
+    this.x = 0;
     this.y = data["y"];
     this.size = 10;
     this.facing = 0; // up; won't be used until later updates
@@ -68,8 +84,8 @@ class Player {
   }
 
   update() {
-    this.x += (mouseX - $(window).width() / 2) / 20;
-    this.y += (mouseY - $(window).height() / 2) / 20;
+    this.x += (mouseX - $(window).width() / 2) / 200;
+    this.y += (mouseY - $(window).height() / 2) / 200;
   }
 
   genUpdateData() {
@@ -79,10 +95,10 @@ class Player {
 
 class OtherPlayer {
   constructor (data) {
-    this.x = data["x"];
-    this.y = data["y"];
-    this.size = data["size"];
-    this.facing = data["facing"];
+    this.x = data.x;
+    this.y = data.y;
+    this.size = 10;
+    this.facing = data.facing;
   }
 
   render() {
@@ -102,8 +118,13 @@ var loop = function() {
   $("#canvas").attr("width", $(window).width());
   $("#canvas").attr("height", $(window).height());
   board.render();
-  board.sendUpdate();
+  board.update();
 }
+
+$(document).mousemove(function(e) {
+  mouseX = e.pageX;
+  mouseY = e.pageY;
+});
 
 $(document).ready(function() {
   ctx = document.getElementById("canvas").getContext("2d");
